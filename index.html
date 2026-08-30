@@ -127,17 +127,17 @@
 
       <!-- السؤال 1 -->
       <div class="question">
-        <p>1) قارن بين العددين: 14 ___ 17</p>
+        <p>1) قارن بين العددين: 14 و 17 (اختر العلاقة الصحيحة للعدد 14 بالنسبة للعدد 17)</p>
         <div class="options">
-          <label><input type="radio" name="q1" value="<"> &lt; (أصغر من)</label>
-          <label><input type="radio" name="q1" value=">"> &gt; (أكبر من)</label>
-          <label><input type="radio" name="q1" value="=">=</label>
+          <label><input type="radio" name="q1" value="أصغر من"> أصغر من</label>
+          <label><input type="radio" name="q1" value="أكبر من"> أكبر من</label>
+          <label><input type="radio" name="q1" value="يساوي"> يساوي</label>
         </div>
       </div>
 
       <!-- السؤال 2 -->
       <div class="question">
-        <p>2) ما هو حاصل جمع: 12 + 5 = ؟</p>
+        <p>2) ما هو حاصل جمع: 12 + 5 ؟</p>
         <div class="options">
           <label><input type="radio" name="q2" value="16"> 16</label>
           <label><input type="radio" name="q2" value="17"> 17</label>
@@ -149,15 +149,15 @@
       <div class="question">
         <p>3) كم عصفورًا في الصورة؟ 🐦 🐦 🐦 🐦 🐦 🐦 🐦 🐦 🐦</p>
         <div class="options">
-          <label><input type="radio" name="q3" value="8"> 8</label>
-          <label><input type="radio" name="q3" value="9"> 9</label>
-          <label><input type="radio" name="q3" value="10"> 10</label>
+          <label><input type="radio" name="q3" value="8"> 8 عصافير</label>
+          <label><input type="radio" name="q3" value="9"> 9 عصافير</label>
+          <label><input type="radio" name="q3" value="10"> 10 عصافير</label>
         </div>
       </div>
 
       <!-- السؤال 4 -->
       <div class="question">
-        <p>4) احسب نتيجة الطرح: 16 - 4 = ؟</p>
+        <p>4) احسب نتيجة الطرح: 16 - 4 ؟</p>
         <div class="options">
           <label><input type="radio" name="q4" value="12"> 12</label>
           <label><input type="radio" name="q4" value="10"> 10</label>
@@ -177,7 +177,7 @@
 
       <!-- السؤال 6 -->
       <div class="question">
-        <p>6) ما هو العدد التالي (الذي يأتي بعد) للعدد 19؟</p>
+        <p>6) ما هو العدد التالي للعدد 19؟</p>
         <div class="options">
           <label><input type="radio" name="q6" value="18"> 18</label>
           <label><input type="radio" name="q6" value="20"> 20</label>
@@ -207,7 +207,7 @@
 
       <!-- السؤال 9 -->
       <div class="question">
-        <p>9) احسب: 20 - 5 = ؟</p>
+        <p>9) احسب: 20 - 5 ؟</p>
         <div class="options">
           <label><input type="radio" name="q9" value="15"> 15</label>
           <label><input type="radio" name="q9" value="10"> 10</label>
@@ -231,14 +231,46 @@
     <div id="result"></div>
   </div>
 
-  <!-- الأصوات -->
-  <audio id="correctSound" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3" preload="auto"></audio>
-  <audio id="wrongSound" src="https://assets.mixkit.co/active_storage/sfx/2874/2874-preview.mp3" preload="auto"></audio>
-
   <script>
+    // توليد مؤثر نغمة نجاح طفولية خفيفة
+    function playSuccessSound() {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const notes = [523.25, 659.25, 783.99, 1046.50]; // نغمات Do-Mi-Sol-Do
+      notes.forEach((freq, index) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime + index * 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + index * 0.1 + 0.3);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(audioCtx.currentTime + index * 0.1);
+        osc.stop(audioCtx.currentTime + index * 0.1 + 0.3);
+      });
+    }
+
+    // توليد مؤثر نغمة محاولة خفيفة
+    function playTryAgainSound() {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const notes = [400, 300];
+      notes.forEach((freq, index) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime + index * 0.15);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + index * 0.15 + 0.25);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(audioCtx.currentTime + index * 0.15);
+        osc.stop(audioCtx.currentTime + index * 0.15 + 0.25);
+      });
+    }
+
     function checkAnswers() {
       const correctAnswers = {
-        q1: "<",
+        q1: "أصغر من",
         q2: "17",
         q3: "9",
         q4: "12",
@@ -264,27 +296,16 @@
       }
 
       const resultDiv = document.getElementById('result');
-      const correctAudio = document.getElementById('correctSound');
-      const wrongAudio = document.getElementById('wrongSound');
-
-      // إيقاف أي صوت شغال مسبقاً وإعادة ضبطه
-      correctAudio.pause();
-      correctAudio.currentTime = 0;
-      wrongAudio.pause();
-      wrongAudio.currentTime = 0;
-
       resultDiv.style.display = 'block';
 
       if (score >= 5) {
-        // تشغيل صوت الإجابة الصحيحة/النجاح
-        correctAudio.play();
+        playSuccessSound();
         resultDiv.className = 'success';
-        resultDiv.innerHTML = `ممتاز! 🎉 لقد حصلت على ${score} من ${totalQuestions}`;
+        resultDiv.innerHTML = `بطل! 🎉 لقد حصلت على ${score} من ${totalQuestions}`;
       } else {
-        // تشغيل صوت المحاولة الإضافية/الخطأ
-        wrongAudio.play();
+        playTryAgainSound();
         resultDiv.className = 'failure';
-        resultDiv.innerHTML = `حصلت على ${score} من ${totalQuestions}. حاول مرة أخرى! 💪`;
+        resultDiv.innerHTML = `حصلت على ${score} من ${totalQuestions}. حاول مرة أخرى يا بطل! 💪`;
       }
     }
   </script>
